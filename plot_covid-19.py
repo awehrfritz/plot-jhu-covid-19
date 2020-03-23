@@ -41,7 +41,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(usage=__doc__)
     parser.add_argument("-e", "--fig-ext", type=str, default=None)
     parser.add_argument("-d", "--download", default=False, action="store_true")
-    parser.add_argument("-c", "--countries", type=str, nargs='+')
+    parser.add_argument("-c", "--countries", default=[], type=str, nargs='+')
     parser.add_argument("-s", "--plot-states", default=False, action="store_true")
     parser.add_argument("-t", "--plot-total", default=False, action="store_true")
     args = parser.parse_args()
@@ -50,6 +50,7 @@ if __name__ == "__main__":
     if args.download or (not os.path.isfile(fname)):
         try:
             urllib.request.urlretrieve(URL, fname, reporthook)
+            print('')
         except urllib.error.HTTPError as ex:
             print('Problem:', ex)
     df = pd.read_csv(fname)
@@ -64,11 +65,13 @@ if __name__ == "__main__":
     if args.plot_total:
         # Total cases
         cases = df.loc[:,idx:].sum()
+        print('%15s (%s): %6d' % ('Total', time[-1], cases[-1]))
         ax.plot(time, cases, '.-', label='Total')
     for c in args.countries:
         # Cases per country
         data = df[df['Country/Region'] == c]
         cases = data.loc[:,idx:].sum()
+        print('%15s (%s): %6d' % (c, time[-1], cases[-1]))
         ax.plot(time, cases, '.-', label=c)
         if args.plot_states and (len(data) > 1):
             # Cases per state
